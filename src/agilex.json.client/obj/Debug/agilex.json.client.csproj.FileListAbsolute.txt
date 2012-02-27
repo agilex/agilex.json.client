@@ -1,0 +1,8 @@
+C:\projects\agilex.json.client\src\agilex.json.client\bin\Debug\agilex.json.client.dll
+C:\projects\agilex.json.client\src\agilex.json.client\bin\Debug\agilex.json.client.pdb
+C:\projects\agilex.json.client\src\agilex.json.client\bin\Debug\Newtonsoft.Json.dll
+C:\projects\agilex.json.client\src\agilex.json.client\bin\Debug\Newtonsoft.Json.pdb
+C:\projects\agilex.json.client\src\agilex.json.client\bin\Debug\Newtonsoft.Json.xml
+C:\projects\agilex.json.client\src\agilex.json.client\obj\Debug\ResolveAssemblyReference.cache
+C:\projects\agilex.json.client\src\agilex.json.client\obj\Debug\agilex.json.client.dll
+C:\projects\agilex.json.client\src\agilex.json.client\obj\Debug\agilex.json.client.pdb

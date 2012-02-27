@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>agilex.json.client</id>
+    <version>1.0.0.1</version>
+    <authors>agilex</authors>
+    <owners>agilex</owners>
+    <projectUrl>http://github.com/agilex/agilex.json</projectUrl>
+    <description>Collection of classes supporting the consuming of json services</description>
+    <copyright>Copyright agileX 2012</copyright>
+    <dependencies>
+      <dependency id="Newtonsoft.Json" version="4.0.8" />
+    </dependencies>
+  </metadata>
+</package>
