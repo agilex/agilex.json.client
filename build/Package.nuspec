@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>agilex.json.client</id>
-    <version>1.0.0.2</version>
+    <version>1.0.0.3</version>
     <authors>agilex</authors>
     <owners>agilex</owners>
     <projectUrl>http://github.com/agilex/agilex.json.client</projectUrl>
