@@ -2,10 +2,10 @@
 <package >
   <metadata>
     <id>agilex.json.client</id>
-    <version>1.0.0.1</version>
+    <version>1.0.0.2</version>
     <authors>agilex</authors>
     <owners>agilex</owners>
-    <projectUrl>http://github.com/agilex/agilex.json</projectUrl>
+    <projectUrl>http://github.com/agilex/agilex.json.client</projectUrl>
     <description>Collection of classes supporting the consuming of json services</description>
     <copyright>Copyright agileX 2012</copyright>
     <dependencies>
