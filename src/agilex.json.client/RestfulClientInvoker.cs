@@ -26,14 +26,14 @@ namespace agilex.json.client
         public T Get<T>(string urlFragment)
         {
             return InvokeRestfulAction((client, urlBuilder) =>
-                                       client.Download<T>(urlBuilder.Build(urlFragment)));
+                                       client.MakeWebRequestWithResult<T>(urlBuilder.Build(urlFragment), "GET"));
         }
 
         public void Delete(string urlFragment)
         {
             try
             {
-                NewWebClient.Delete(_urlBuilder.Build(urlFragment));
+                NewWebClient.MakeWebRequest(_urlBuilder.Build(urlFragment), "DELETE");
             }
             catch (Exception ex)
             {
@@ -45,7 +45,7 @@ namespace agilex.json.client
         {
             try
             {
-                NewWebClient.UploadWithNoResponse(_urlBuilder.Build(urlFragment), "PUT", up);
+                NewWebClient.MakeWebRequest(_urlBuilder.Build(urlFragment), up, "PUT");
             }
             catch (Exception ex)
             {
@@ -62,16 +62,14 @@ namespace agilex.json.client
         {
             return InvokeRestfulAction(
                 (client, urlBuilder) =>
-                client.Upload<TUp, TDown>(
-                    urlBuilder.Build(urlFragment), "POST", up));
+                client.MakeWebRequestWithResult<TUp, TDown>(urlBuilder.Build(urlFragment), up, "POST"));
         }
 
         public TDown Put<TUp, TDown>(string urlFragment, TUp up)
         {
             return InvokeRestfulAction(
                 (client, urlBuilder) =>
-                client.Upload<TUp, TDown>(
-                    urlBuilder.Build(urlFragment), "PUT", up));
+                client.MakeWebRequestWithResult<TUp, TDown>(urlBuilder.Build(urlFragment), up, "PUT"));
         }
 
         T InvokeRestfulAction<T>(Func<IWebClient, IUrlBuilder, T> restfulAction)

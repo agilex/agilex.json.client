@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
+using Newtonsoft.Json;
 
 namespace agilex.json.client
 {
@@ -23,21 +24,225 @@ namespace agilex.json.client
 
         #region IWebClient Members
 
-        public T Download<T>(string url)
+        public void MakeWebRequest(string url, string method)
         {
             try
             {
+                // build request
                 var request = (HttpWebRequest) WebRequest.Create(url);
-                AddAuthHeader(request);
+                if (!string.IsNullOrEmpty(_username) && !string.IsNullOrEmpty(_password))
+                    AddAuthHeader(request);
                 request.ContentType = "application/json";
-                request.Method = "GET";
+                request.Method = method;
                 request.KeepAlive = true;
-                return ReadResponseAsJson<T>(request);
+
+                // make request
+                var response = request.GetResponse();
+                var status = ((HttpWebResponse) response).StatusCode;
+
+                if (Convert.ToInt32(status) >= 400)
+                {
+                    throw new Exception("Error making request");
+                }
+            }
+            catch (WebException e)
+            {
+                // 401, 404, 500 etc etc
+                var response = e.Response;
+                throw new Exception("Error calling " + url, e);
             }
             catch (Exception ex)
             {
                 throw new Exception("Error calling " + url, ex);
             }
+        }
+
+        public void MakeWebRequest<T>(string url, T objectToUpload, string method)
+        {
+            try
+            {
+                // build request
+                var request = (HttpWebRequest)WebRequest.Create(url);
+                if (!string.IsNullOrEmpty(_username) && !string.IsNullOrEmpty(_password))
+                    AddAuthHeader(request);
+                request.ContentType = "application/json";
+                request.Method = method;
+                request.KeepAlive = true;
+                
+                // add body
+                using (Stream requestStream = request.GetRequestStream())
+                {
+                    var writer = new JsonTextWriter(new StreamWriter(requestStream));
+                    var ser = new JsonSerializer();
+                    ser.Serialize(writer, objectToUpload);
+                }
+
+                // make request
+                var response = request.GetResponse();
+                var status = ((HttpWebResponse)response).StatusCode;
+
+                if (Convert.ToInt32(status) >= 400)
+                {
+                    throw new Exception("Error making request");
+                }
+            }
+            catch (WebException e)
+            {
+                // 401, 404, 500 etc etc
+                var response = e.Response;
+                throw new Exception("Error calling " + url, e);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error calling " + url, ex);
+            }
+        }
+
+        public T MakeWebRequestWithResult<T>(string url, string method)
+        {
+            try
+            {
+                // build request
+                var request = (HttpWebRequest) WebRequest.Create(url);
+                if (!string.IsNullOrEmpty(_username) && !string.IsNullOrEmpty(_password))
+                    AddAuthHeader(request);
+                request.ContentType = "application/json";
+                request.Method = method;
+                request.KeepAlive = true;
+                
+                // make request
+                var response = request.GetResponse();
+                var status = ((HttpWebResponse)response).StatusCode;
+
+                if (Convert.ToInt32(status) >= 400)
+                {
+                    throw new Exception("Error making request");
+                }
+
+                // parse response
+                using (var responseStream = response.GetResponseStream())
+                {
+                    if (responseStream == null) throw new Exception("Invalid response");
+                    var reader = new JsonTextReader(new StreamReader(responseStream));
+                    var deserializer = new JsonSerializer();
+                    return deserializer.Deserialize<T>(reader);
+                }                
+            }
+            catch (WebException e)
+            {
+                // 401, 404, 500 etc etc
+                var response = e.Response;
+                throw new Exception("Error calling " + url, e);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error calling " + url, ex);
+            }
+        }
+
+        public T MakeWebRequestWithResult<T>(string url, T objectToUpload, string method)
+        {
+            try
+            {
+                // build request
+                var request = (HttpWebRequest)WebRequest.Create(url);
+                if (!string.IsNullOrEmpty(_username) && !string.IsNullOrEmpty(_password))
+                    AddAuthHeader(request);
+                request.ContentType = "application/json";
+                request.Method = method;
+                request.KeepAlive = true;
+
+                // add body
+                using (Stream requestStream = request.GetRequestStream())
+                {
+                    var writer = new JsonTextWriter(new StreamWriter(requestStream));
+                    var ser = new JsonSerializer();
+                    ser.Serialize(writer, objectToUpload);
+                }
+                
+                // make request
+                var response = request.GetResponse();
+                var status = ((HttpWebResponse)response).StatusCode;
+
+                if (Convert.ToInt32(status) >= 400)
+                {
+                    throw new Exception("Error making request");
+                }
+
+                // parse response
+                using (var responseStream = response.GetResponseStream())
+                {
+                    if (responseStream == null) throw new Exception("Invalid response");
+                    var reader = new JsonTextReader(new StreamReader(responseStream));
+                    var deserializer = new JsonSerializer();
+                    return deserializer.Deserialize<T>(reader);
+                }
+            }
+            catch (WebException e)
+            {
+                // 401, 404, 500 etc etc
+                var response = e.Response;
+                throw new Exception("Error calling " + url, e);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error calling " + url, ex);
+            }
+        }
+
+        public TDown MakeWebRequestWithResult<TUp, TDown>(string url, TUp objectToUpload, string method)
+        {
+            try
+            {
+                // build request
+                var request = (HttpWebRequest)WebRequest.Create(url);
+                if (!string.IsNullOrEmpty(_username) && !string.IsNullOrEmpty(_password))
+                    AddAuthHeader(request);
+                request.ContentType = "application/json";
+                request.Method = method;
+                request.KeepAlive = true;
+
+                // add body
+                using (Stream requestStream = request.GetRequestStream())
+                {
+                    var writer = new JsonTextWriter(new StreamWriter(requestStream));
+                    var ser = new JsonSerializer();
+                    ser.Serialize(writer, objectToUpload);
+                }
+
+                // make request
+                var response = request.GetResponse();
+                var status = ((HttpWebResponse)response).StatusCode;
+
+                if (Convert.ToInt32(status) >= 400)
+                {
+                    throw new Exception("Error making request");
+                }
+
+                // parse response
+                using (var responseStream = response.GetResponseStream())
+                {
+                    if (responseStream == null) throw new Exception("Invalid response");
+                    var reader = new JsonTextReader(new StreamReader(responseStream));
+                    var deserializer = new JsonSerializer();
+                    return deserializer.Deserialize<TDown>(reader);
+                }
+            }
+            catch (WebException e)
+            {
+                // 401, 404, 500 etc etc
+                var response = e.Response;
+                throw new Exception("Error calling " + url, e);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error calling " + url, ex);
+            }
+        }
+        
+        public T Download<T>(string url)
+        {
+            return default(T);
         }
 
         public void UploadWithNoResponse<T>(string url, string method, T obj)
@@ -82,19 +287,6 @@ namespace agilex.json.client
 
         public void Delete(string url)
         {
-            try
-            {
-                var request = (HttpWebRequest) WebRequest.Create(url);
-                AddAuthHeader(request);
-                request.ContentType = "application/json";
-                request.Method = "DELETE";
-                WebResponse response = request.GetResponse();
-                response.Close();
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("Error deleting " + url, ex);
-            }
         }
 
         #endregion
@@ -129,6 +321,20 @@ namespace agilex.json.client
                                               result));
         }
 
+
+
+        HttpWebRequest BuildEmptyBodyRequest(string url, string method)
+        {
+            var request = (HttpWebRequest)WebRequest.Create(url);
+            request.ContentType = "application/json";
+            if (!string.IsNullOrEmpty(_username) && !string.IsNullOrEmpty(_password))
+                AddAuthHeader(request);
+            request.Method = method;
+            request.ContentLength = 0;
+            request.KeepAlive = true;
+            return request;
+        }
+
         HttpWebRequest BuildUploadRequest<T>(T obj, string url, string method)
         {
             string json = obj.ToJson();
@@ -149,14 +355,13 @@ namespace agilex.json.client
 
         void AddAuthHeader(HttpWebRequest request)
         {
-            if (
-                !request.Headers.AllKeys.Any(p => p.Equals("Authorization", StringComparison.InvariantCultureIgnoreCase)))
-            {
-                string token =
-                    Convert.ToBase64String(Encoding.UTF8.GetBytes(string.Format("{0}:{1}", _username, _password)));
-                string authHeader = string.Format("Basic {0}", token);
-                request.Headers.Add("Authorization", authHeader);
-            }
+            if (request.Headers.AllKeys.Any(p => p.Equals("Authorization", StringComparison.InvariantCultureIgnoreCase)))
+                return;
+            
+            string token =
+                Convert.ToBase64String(Encoding.UTF8.GetBytes(string.Format("{0}:{1}", _username, _password)));
+            string authHeader = string.Format("Basic {0}", token);
+            request.Headers.Add("Authorization", authHeader);
         }
     }
 }
