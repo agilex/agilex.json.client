@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 
-namespace agilex.json.client
+namespace agilex.json.client.Urls
 {
     public class UrlBuilder : IUrlBuilder
     {

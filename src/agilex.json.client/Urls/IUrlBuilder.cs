@@ -1,4 +1,4 @@
-namespace agilex.json.client
+namespace agilex.json.client.Urls
 {
     public interface IUrlBuilder
     {
