@@ -9,6 +9,7 @@ namespace agilex.json.client.Rest
         T PostWithResponse<T>(string urlFragment, T body);
         TDown PostWithResponse<TUp, TDown>(string urlFragment, TUp body);
         T PutWithResponse<T>(string urlFragment, T body);        
-        TDown PutWithResponse<TUp, TDown>(string urlFragment, TUp body);        
+        TDown PutWithResponse<TUp, TDown>(string urlFragment, TUp body);
+        T DeleteWithResponse<T>(string urlFragment);
     }
 }

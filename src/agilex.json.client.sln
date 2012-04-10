@@ -3,6 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "agilex.json.client", "agilex.json.client\agilex.json.client.csproj", "{7601FB44-FA25-4BF3-9278-6362CBEEAC8A}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{CE035432-A3FF-4E10-8B7E-4D7EE1C92D46}"
+	ProjectSection(SolutionItems) = preProject
+		..\README.txt = ..\README.txt
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

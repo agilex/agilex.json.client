@@ -91,5 +91,11 @@ namespace agilex.json.client.Rest
             return InvokeWebClient(
                 urlFragment, (webClient, fullUrl) => webClient.MakeWebRequestWithResult<TUp, TDown>(fullUrl, HttpVerbPut, body));
         }
+
+        public T DeleteWithResponse<T>(string urlFragment)
+        {
+            return InvokeWebClient(
+                urlFragment, (webClient, fullUrl) => webClient.MakeWebRequestWithResult<T>(fullUrl, HttpVerbDelete));
+        }
     }
 }
