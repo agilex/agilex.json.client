@@ -47,7 +47,11 @@ namespace agilex.json.client.Client
 
         public T MakeWebRequestWithResult<T>(string url, string method)
         {
-            return TryWebRequest<T>(url, method, InitiateRequest);
+            return TryWebRequest<T>(url, method, request =>
+                                                     {
+                                                         AddEmptyBody(request);
+                                                         return InitiateRequest(request);
+                                                     });
         }
 
         public T MakeWebRequestWithResult<T>(string url, string method, T body)
@@ -141,6 +145,11 @@ namespace agilex.json.client.Client
                     return reader.ReadToEnd();
                 }
             }
+        }
+
+        static void AddEmptyBody(WebRequest request)
+        {
+           AddRequestBodyAsJson(string.Empty, request);
         }
 
         static void AddRequestBodyAsJson<TUp>(TUp body, WebRequest request)
