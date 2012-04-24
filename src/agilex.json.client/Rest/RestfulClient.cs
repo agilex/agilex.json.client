@@ -27,6 +27,10 @@ namespace agilex.json.client.Rest
         {
         }
 
+        public RestfulClient(string baseUrl) : this(new WebClientFactory(), new UrlBuilder(baseUrl))
+        {            
+        }
+
         IWebClient NewWebClient
         {
             get
@@ -68,6 +72,13 @@ namespace agilex.json.client.Rest
             InvokeWebClient(urlFragment, (webclient, fullUrl) => webclient.MakeWebRequest(fullUrl, HttpVerbDelete));
         }
 
+        public TDown PostWithResponse<TDown>(string urlFragment)
+        {
+            return InvokeWebClient(urlFragment,
+                                   (webClient, fullUrl) =>
+                                   webClient.MakeWebRequestWithResult<TDown>(fullUrl, HttpVerbPost));
+        }
+
         public T PostWithResponse<T>(string urlFragment, T body)
         {
             return InvokeWebClient(
@@ -78,6 +89,14 @@ namespace agilex.json.client.Rest
         {
             return InvokeWebClient(
                 urlFragment, (webClient, fullUrl) => webClient.MakeWebRequestWithResult<TUp, TDown>(fullUrl, HttpVerbPost, body));
+        }
+
+        public TDown PutWithResponse<TDown>(string urlFragment)
+        {
+            return InvokeWebClient(urlFragment,
+                       (webClient, fullUrl) =>
+                       webClient.MakeWebRequestWithResult<TDown>(fullUrl, HttpVerbPut));
+
         }
 
         public T PutWithResponse<T>(string urlFragment, T body)
