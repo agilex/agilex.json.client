@@ -6,7 +6,7 @@ using System.Net;
 using System.Text;
 using Newtonsoft.Json;
 using agilex.json.client.Errors;
-using agilex.json.client.HeaderProviders;
+using agilex.json.client.Headers;
 
 namespace agilex.json.client.Client
 {

@@ -1,7 +1,7 @@
 using System;
 using Newtonsoft.Json;
 
-namespace agilex.json.client.Rest
+namespace agilex.json.client.Parsers
 {
     public class JsonTypeParser : ITypeParser
     {

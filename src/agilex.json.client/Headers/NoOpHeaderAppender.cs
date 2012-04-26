@@ -1,7 +1,6 @@
 using System.Net;
-using agilex.json.client.HeaderProviders;
 
-namespace agilex.json.client.Client
+namespace agilex.json.client.Headers
 {
     public class NoOpHeaderAppender : IHeaderAppender
     {

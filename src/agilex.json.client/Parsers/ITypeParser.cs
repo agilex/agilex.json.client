@@ -1,4 +1,4 @@
-namespace agilex.json.client.Rest
+namespace agilex.json.client.Parsers
 {
     public interface ITypeParser
     {

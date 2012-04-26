@@ -44,7 +44,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Client\JsonWebClient.cs" />
-    <Compile Include="Client\NoOpHeaderAppender.cs" />
+    <Compile Include="Headers\NoOpHeaderAppender.cs" />
     <Compile Include="Errors\Error.cs" />
     <Compile Include="Errors\Http400.cs" />
     <Compile Include="Errors\Http401.cs" />
@@ -53,11 +53,11 @@
     <Compile Include="Errors\HttpError.cs" />
     <Compile Include="Errors\HttpException.cs" />
     <Compile Include="Errors\HttpWebResponseWasNull.cs" />
-    <Compile Include="HeaderProviders\IBasicAuthHeaderProvider.cs" />
-    <Compile Include="HeaderProviders\IHeaderAppender.cs" />
+    <Compile Include="Headers\BasicAuthHeaderProvider.cs" />
+    <Compile Include="Headers\IHeaderAppender.cs" />
     <Compile Include="Client\IWebClient.cs" />
-    <Compile Include="Rest\ITypeParser.cs" />
-    <Compile Include="Rest\JsonTypeParser.cs" />
+    <Compile Include="Parsers\ITypeParser.cs" />
+    <Compile Include="Parsers\JsonTypeParser.cs" />
     <Compile Include="Urls\IUrlBuilder.cs" />
     <Compile Include="Client\IRawClient.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using agilex.json.client.Errors;
-using agilex.json.client.HeaderProviders;
-using agilex.json.client.Rest;
+using agilex.json.client.Headers;
+using agilex.json.client.Parsers;
 using agilex.json.client.Urls;
 
 namespace agilex.json.client.Client
