@@ -51,6 +51,7 @@
     <Compile Include="Errors\Http500.cs" />
     <Compile Include="Errors\HttpError.cs" />
     <Compile Include="Errors\HttpWebResponseWasNull.cs" />
+    <Compile Include="HeaderProviders\IBasicAuthHeaderProvider.cs" />
     <Compile Include="Rest\IRestfulClient.cs" />
     <Compile Include="Urls\IUrlBuilder.cs" />
     <Compile Include="Client\IWebClient.cs" />
