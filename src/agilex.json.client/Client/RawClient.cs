@@ -13,15 +13,12 @@ namespace agilex.json.client.Client
     public class RawClient : IRawClient
     {
         readonly IHeaderAppender _headerAppender;
+        readonly string _contentType;
 
-        public RawClient(IHeaderAppender headerAppender)
+        public RawClient(IHeaderAppender headerAppender, string contentType)
         {
             _headerAppender = headerAppender;
-        }
-
-        public RawClient()
-            : this(new NoOpHeaderAppender())
-        {
+            _contentType = contentType;
         }
 
         #region IWebClient Members
@@ -36,7 +33,7 @@ namespace agilex.json.client.Client
             TryWebRequest(
                 url, method, request =>
                 {
-                    AddRequestBodyAsJson(body, request);
+                    AddRequestBody(body, request);
                     var response = InitiateRequest(request);
                     ParseResponseAsString(response);
                 });
@@ -52,7 +49,7 @@ namespace agilex.json.client.Client
             return TryWebRequest(
                 url, method, request =>
                 {
-                    AddRequestBodyAsJson(body, request);
+                    AddRequestBody(body, request);
                     return InitiateRequest(request);
                 });
         }
@@ -121,7 +118,7 @@ namespace agilex.json.client.Client
             }
         }
 
-        static void AddRequestBodyAsJson(string body, WebRequest request)
+        static void AddRequestBody(string body, WebRequest request)
         {
             request.ContentType = "application/json";
             if (string.IsNullOrWhiteSpace(body)) return;
@@ -137,6 +134,7 @@ namespace agilex.json.client.Client
         HttpWebRequest BuildRequest(string url, string method)
         {
             var request = (HttpWebRequest)WebRequest.Create(url);
+            request.ContentType = _contentType;
             _headerAppender.AppendTo(request);
             request.Method = method;
             request.KeepAlive = true;
