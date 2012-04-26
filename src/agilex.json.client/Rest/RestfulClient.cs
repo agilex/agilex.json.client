@@ -1,54 +1,37 @@
 using System;
 using agilex.json.client.Client;
+using agilex.json.client.HeaderProviders;
 using agilex.json.client.Urls;
 
 namespace agilex.json.client.Rest
 {
     public class RestfulClient : IRestfulClient
     {
-        readonly IWebClientFactory _webClientFactory;
+        readonly IWebClient _webClient;
         readonly IUrlBuilder _urlBuilder;
-        readonly string _username;
-        readonly string _password;
         const string HttpVerbGet = "GET";
         const string HttpVerbPost = "POST";
         const string HttpVerbPut = "PUT";
         const string HttpVerbDelete = "DELETE";
 
-        public RestfulClient(IWebClientFactory webClientFactory, IUrlBuilder urlBuilder, string username, string password)
+        public RestfulClient(IWebClient webClient, IUrlBuilder urlBuilder)
         {
-            _webClientFactory = webClientFactory;
+            _webClient = webClient;
             _urlBuilder = urlBuilder;
-            _username = username;
-            _password = password;
         }
 
-        public RestfulClient(IWebClientFactory webClientFactory, IUrlBuilder urlBuilder) : this(webClientFactory, urlBuilder, string.Empty, string.Empty)
-        {
-        }
-
-        public RestfulClient(string baseUrl) : this(new WebClientFactory(), new UrlBuilder(baseUrl))
+        public RestfulClient(string baseUrl) : this(new WebClient(), new UrlBuilder(baseUrl))
         {            
-        }
-
-        IWebClient NewWebClient
-        {
-            get
-            {
-                return (!string.IsNullOrEmpty(_username) && !(string.IsNullOrEmpty(_password)))
-                           ? _webClientFactory.InstanceUsingAuthentication(_username, _password)
-                           : _webClientFactory.Instance();
-            }
         }
 
         T InvokeWebClient<T>(string urlFragment, Func<IWebClient, string, T> action)
         {
-            return action(NewWebClient, _urlBuilder.Build(urlFragment));
+            return action(_webClient, _urlBuilder.Build(urlFragment));
         }
         
         void InvokeWebClient(string urlFragment, Action<IWebClient, string> action)
         {
-            action(NewWebClient, _urlBuilder.Build(urlFragment));
+            action(_webClient, _urlBuilder.Build(urlFragment));
         }
 
         public T Get<T>(string urlFragment)

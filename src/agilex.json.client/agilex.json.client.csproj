@@ -52,15 +52,14 @@
     <Compile Include="Errors\HttpError.cs" />
     <Compile Include="Errors\HttpWebResponseWasNull.cs" />
     <Compile Include="HeaderProviders\IBasicAuthHeaderProvider.cs" />
+    <Compile Include="HeaderProviders\IHeaderAppender.cs" />
     <Compile Include="Rest\IRestfulClient.cs" />
     <Compile Include="Urls\IUrlBuilder.cs" />
     <Compile Include="Client\IWebClient.cs" />
-    <Compile Include="Client\IWebClientFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Rest\RestfulClient.cs" />
     <Compile Include="Urls\UrlBuilder.cs" />
     <Compile Include="Client\WebClient.cs" />
-    <Compile Include="Client\WebClientFactory.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

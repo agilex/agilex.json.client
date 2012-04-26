@@ -6,21 +6,20 @@ using System.Net;
 using System.Text;
 using Newtonsoft.Json;
 using agilex.json.client.Errors;
+using agilex.json.client.HeaderProviders;
 
 namespace agilex.json.client.Client
 {
     public class WebClient : IWebClient
     {
-        readonly string _password;
-        readonly string _username;
+        readonly IHeaderAppender _headerAppender;
 
-        public WebClient(string username, string password)
+        public WebClient(IHeaderAppender headerAppender)
         {
-            _username = username;
-            _password = password;
+            _headerAppender = headerAppender;
         }
 
-        public WebClient() : this(string.Empty, string.Empty)
+        public WebClient() : this(new NoOpHeaderAppender())
         {
         }
 
@@ -81,7 +80,7 @@ namespace agilex.json.client.Client
         {
             try
             {
-                var request = BuildRequest(url, method, _username, _password);
+                var request = BuildRequest(url, method);
                 webRequest(request);
             }
             catch (Exception ex)
@@ -94,7 +93,7 @@ namespace agilex.json.client.Client
         {
             try
             {
-                var request = BuildRequest(url, method, _username, _password);
+                var request = BuildRequest(url, method);
                 var response = makeWebRequest(request);
                 return ParseResponseAsString(response).FromJson<TDown>();
             }
@@ -163,24 +162,20 @@ namespace agilex.json.client.Client
             }
         }
 
-        static HttpWebRequest BuildRequest(string url, string method, string username, string password)
+        HttpWebRequest BuildRequest(string url, string method)
         {
             var request = (HttpWebRequest) WebRequest.Create(url);
-            if (!string.IsNullOrEmpty(username) && !string.IsNullOrEmpty(password))
-                AddAuthHeader(request, username, password);
+            _headerAppender.AppendTo(request);
             request.Method = method;
             request.KeepAlive = true;
             return request;
         }
 
-        static void AddAuthHeader(WebRequest request, string username, string password)
+        class NoOpHeaderAppender : IHeaderAppender
         {
-            if (request.Headers.AllKeys.Any(p => p.Equals("Authorization", StringComparison.InvariantCultureIgnoreCase)))
-                return;
-
-            var token = Convert.ToBase64String(Encoding.UTF8.GetBytes(string.Format("{0}:{1}", username, password)));
-            var authHeader = string.Format("Basic {0}", token);
-            request.Headers.Add("Authorization", authHeader);
+            public void AppendTo(WebRequest request)
+            {              
+            }
         }
     }
 }
