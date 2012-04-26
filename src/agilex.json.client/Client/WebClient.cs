@@ -1,132 +1,158 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Net;
-using System.Text;
-using Newtonsoft.Json;
 using agilex.json.client.Errors;
 using agilex.json.client.HeaderProviders;
+using agilex.json.client.Rest;
+using agilex.json.client.Urls;
 
 namespace agilex.json.client.Client
 {
     public class WebClient : IWebClient
     {
-        readonly IHeaderAppender _headerAppender;
-
-        public WebClient(IHeaderAppender headerAppender)
+        readonly IRawClient _rawClient;
+        readonly IUrlBuilder _urlBuilder;
+        const string HttpVerbGet = "GET";
+        const string HttpVerbPost = "POST";
+        const string HttpVerbPut = "PUT";
+        const string HttpVerbDelete = "DELETE";
+        readonly ITypeParser _typeParser;
+        public WebClient(IUrlBuilder urlBuilder, ITypeParser typeParser, IHeaderAppender headerAppender)
         {
-            _headerAppender = headerAppender;
+            _rawClient = new RawClient(headerAppender);
+            _urlBuilder = urlBuilder;
+            _typeParser = typeParser;
         }
 
-        public WebClient() : this(new NoOpHeaderAppender())
-        {
+        public WebClient(string baseUrl, ITypeParser typeParser)
+            : this(new UrlBuilder(baseUrl), typeParser, new NoOpHeaderAppender())
+        {            
         }
 
-        #region IWebClient Members
-
-        public void MakeWebRequest(string url, string method)
+        public T Get<T>(string urlFragment)
         {
-            TryWebRequest(
-                url, method, request =>
-                                 {
-                                     var response = InitiateRequest(request);
-                                     ParseResponseAsString(response);
-                                 });
+            return InvokeWebClient(
+                urlFragment, (webClient, fullUrl) =>
+                {
+                    var result = webClient.MakeWebRequestWithResult(fullUrl, HttpVerbGet);
+                    return _typeParser.From<T>(result);
+                });
         }
 
-        public void MakeWebRequest<T>(string url, string method, T body)
+        public void Post<T>(string urlFragment, T body)
         {
-            TryWebRequest(
-                url, method, request =>
-                                 {
-                                     AddRequestBodyAsJson(body, request);
-                                     var response = InitiateRequest(request);
-                                     ParseResponseAsString(response);
-                                 });
+            InvokeWebClient(urlFragment, (webclient, fullUrl) => webclient.MakeWebRequest(fullUrl, HttpVerbPost, _typeParser.To(body)));
         }
 
-        public T MakeWebRequestWithResult<T>(string url, string method)
+        public void Put<T>(string urlFragment, T body)
         {
-            return TryWebRequest<T>(url, method, InitiateRequest);
+            InvokeWebClient(urlFragment, (webclient, fullUrl) => webclient.MakeWebRequest(fullUrl, HttpVerbPut, _typeParser.To(body)));
         }
 
-        public T MakeWebRequestWithResult<T>(string url, string method, T body)
+        public void Delete(string urlFragment)
         {
-            return MakeWebRequestWithResult<T, T>(url, method, body);
+            InvokeWebClient(urlFragment, (webclient, fullUrl) => webclient.MakeWebRequest(fullUrl, HttpVerbDelete));
         }
 
-        public TDown MakeWebRequestWithResult<TUp, TDown>(string url, string method, TUp body)
+        public TDown PostWithResponse<TDown>(string urlFragment)
         {
-            return TryWebRequest<TDown>(
-                url, method, request =>
-                                 {
-                                     AddRequestBodyAsJson(body, request);
-                                     return InitiateRequest(request);
-                                 });
+            return InvokeWebClient(urlFragment,
+                                   (webClient, fullUrl) => {
+                                       var result = webClient.MakeWebRequestWithResult(fullUrl, HttpVerbPost);
+                                       return _typeParser.From<TDown>(result);
+                                   });
         }
 
-        #endregion
-
-        static WebResponse InitiateRequest(WebRequest request)
+        public T PostWithResponse<T>(string urlFragment, T body)
         {
-            var response = request.GetResponse();
-            var status = ((HttpWebResponse) response).StatusCode;
-            if (Convert.ToInt32(status) >= 400) throw new Exception("Error making request");
-            return response;
+            return InvokeWebClient(
+                urlFragment, (webClient, fullUrl) =>
+                {
+                    var result = webClient.MakeWebRequestWithResult(fullUrl, HttpVerbPost, _typeParser.To(body));
+                    return _typeParser.From<T>(result);
+                });
         }
 
-        void TryWebRequest(string url, string method, Action<WebRequest> webRequest)
+        public TDown PostWithResponse<TUp, TDown>(string urlFragment, TUp body)
+        {
+            return InvokeWebClient(
+                urlFragment, (webClient, fullUrl) =>
+                {
+                    var result = webClient.MakeWebRequestWithResult(fullUrl, HttpVerbPost, _typeParser.To(body));
+                    return _typeParser.From<TDown>(result);
+                });
+        }
+
+        public TDown PutWithResponse<TDown>(string urlFragment)
+        {
+            return InvokeWebClient(urlFragment,
+                       (webClient, fullUrl) =>
+                       {
+                           var result = webClient.MakeWebRequestWithResult(fullUrl, HttpVerbPut);
+                           return _typeParser.From<TDown>(result);
+                       });
+
+        }
+
+        public T PutWithResponse<T>(string urlFragment, T body)
+        {
+            return InvokeWebClient(
+                urlFragment, (webClient, fullUrl) =>
+                {
+                    var result = webClient.MakeWebRequestWithResult(fullUrl, HttpVerbPut, _typeParser.To(body));
+                    return _typeParser.From<T>(result);
+                });
+        }
+
+        public TDown PutWithResponse<TUp, TDown>(string urlFragment, TUp body)
+        {
+            return InvokeWebClient(
+                urlFragment, (webClient, fullUrl) =>
+                {
+                    var result = webClient.MakeWebRequestWithResult(fullUrl, HttpVerbPut, _typeParser.To(body));
+                    return _typeParser.From<TDown>(result);
+                });
+        }
+
+        public T DeleteWithResponse<T>(string urlFragment)
+        {
+            return InvokeWebClient(
+                urlFragment, (webClient, fullUrl) =>
+                {
+                    var result = webClient.MakeWebRequestWithResult(fullUrl, HttpVerbDelete);
+                    return _typeParser.From<T>(result);
+                });
+        }
+
+
+        T InvokeWebClient<T>(string urlFragment, Func<IRawClient, string, T> action)
         {
             try
             {
-                var request = BuildRequest(url, method);
-                webRequest(request);
+                return action(_rawClient, _urlBuilder.Build(urlFragment));
             }
-            catch (Exception ex)
+            catch (HttpException e)
             {
-                throw ExtractWebResponseFromException(url, ex);
+                throw ParseException(e);
             }
         }
 
-        TDown TryWebRequest<TDown>(string url, string method, Func<WebRequest, WebResponse> makeWebRequest)
+        HttpError ParseException(HttpException e)
         {
-            try
-            {
-                var request = BuildRequest(url, method);
-                var response = makeWebRequest(request);
-                return ParseResponseAsString(response).FromJson<TDown>();
-            }
-            catch (Exception ex)
-            {
-                throw ExtractWebResponseFromException(url, ex);
-            }
-        }
-
-        static Exception ExtractWebResponseFromException(string url, Exception exception)
-        {
-            if (exception.GetType() != typeof(WebException)) return exception;
-            // 401, 404, 500
-            var response = ((WebException) exception).Response;
-            if (response == null)
-            {
-                return new HttpWebResponseWasNull(url);
-            }
-
-            var status = ((HttpWebResponse)response).StatusCode;
-            var body = ParseResponseAsString(response);
+            var body = e.Body;
+            var status = e.StatusCode;
             List<Error> errors;
             try
             {
-                errors = new List<Error>{body.FromJson<Error>()};
+                errors = new List<Error> { _typeParser.From<Error>(body) };
             }
-            catch 
+            catch
             {
                 try
                 {
-                    errors = body.FromJson<List<Error>>();
+                    errors = _typeParser.From<List<Error>>(body);
                 }
-                catch 
+                catch
                 {
                     errors = new List<Error> { new Error { Key = "Message", Value = body } };
                 }
@@ -135,47 +161,19 @@ namespace agilex.json.client.Client
             if (status == HttpStatusCode.Unauthorized) return new Http401(errors);
             if (status == HttpStatusCode.Forbidden) return new Http403(errors);
             return new Http500(errors);
-        }
 
-        static string ParseResponseAsString(WebResponse response)
+        }
+        void InvokeWebClient(string urlFragment, Action<IRawClient, string> action)
         {
-            using (var responseStream = response.GetResponseStream())
+            try
             {
-                if (responseStream == null) throw new Exception("Invalid response");
-                using (var reader = new StreamReader(responseStream))
-                {
-                    return reader.ReadToEnd();
-                }
+                action(_rawClient, _urlBuilder.Build(urlFragment));
             }
-        }
-
-        static void AddRequestBodyAsJson<TUp>(TUp body, WebRequest request)
-        {
-            request.ContentType = "application/json";
-            using (var requestStream = request.GetRequestStream())
+            catch (HttpException e)
             {
-                using (var writer = new JsonTextWriter(new StreamWriter(requestStream)))
-                {
-                    var ser = new JsonSerializer();
-                    ser.Serialize(writer, body);
-                }
+                throw ParseException(e);
             }
         }
 
-        HttpWebRequest BuildRequest(string url, string method)
-        {
-            var request = (HttpWebRequest) WebRequest.Create(url);
-            _headerAppender.AppendTo(request);
-            request.Method = method;
-            request.KeepAlive = true;
-            return request;
-        }
-
-        class NoOpHeaderAppender : IHeaderAppender
-        {
-            public void AppendTo(WebRequest request)
-            {              
-            }
-        }
     }
 }

@@ -1,11 +1,13 @@
-using System;
+using System.Net;
 
 namespace agilex.json.client.Errors
 {
-    public class HttpWebResponseWasNull : Exception
+    public class HttpWebResponseWasNull : HttpException
     {
-        public HttpWebResponseWasNull(string url) : base(string.Format("Got null response from {0}", url))
+        public HttpWebResponseWasNull(string url)
+            : base(url, HttpStatusCode.InternalServerError, string.Empty)
         {
         }
     }
+
 }

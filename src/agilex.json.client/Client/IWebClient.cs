@@ -2,10 +2,16 @@ namespace agilex.json.client.Client
 {
     public interface IWebClient
     {
-        void MakeWebRequest(string url, string method);
-        void MakeWebRequest<T>(string url, string method, T body);
-        T MakeWebRequestWithResult<T>(string url, string method);
-        T MakeWebRequestWithResult<T>(string url, string method, T body);
-        TDown MakeWebRequestWithResult<TUp, TDown>(string url, string method, TUp body);
+        T Get<T>(string urlFragment);
+        void Post<T>(string urlFragment, T body);
+        void Put<T>(string urlFragment, T body);
+        void Delete(string urlFragment);
+        TDown PostWithResponse<TDown>(string urlFragment);
+        T PostWithResponse<T>(string urlFragment, T body);
+        TDown PostWithResponse<TUp, TDown>(string urlFragment, TUp body);
+        TDown PutWithResponse<TDown>(string urlFragment);        
+        T PutWithResponse<T>(string urlFragment, T body);        
+        TDown PutWithResponse<TUp, TDown>(string urlFragment, TUp body);
+        T DeleteWithResponse<T>(string urlFragment);
     }
 }
