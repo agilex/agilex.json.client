@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
 using Newtonsoft.Json;
+using agilex.json.client.Errors;
 
 namespace agilex.json.client.Client
 {
@@ -84,7 +86,7 @@ namespace agilex.json.client.Client
             }
             catch (Exception ex)
             {
-                throw ExtractWebResponseFromException(ex);
+                throw ExtractWebResponseFromException(url, ex);
             }
         }
 
@@ -94,41 +96,46 @@ namespace agilex.json.client.Client
             {
                 var request = BuildRequest(url, method, _username, _password);
                 var response = makeWebRequest(request);
-                return ParseResponseAsJson<TDown>(response);
+                return ParseResponseAsString(response).FromJson<TDown>();
             }
             catch (Exception ex)
             {
-                throw ExtractWebResponseFromException(ex);
+                throw ExtractWebResponseFromException(url, ex);
             }
         }
 
-        static Exception ExtractWebResponseFromException(Exception exception)
+        static Exception ExtractWebResponseFromException(string url, Exception exception)
         {
-            if (exception.GetType() == typeof (WebException))
+            if (exception.GetType() != typeof(WebException)) return exception;
+            // 401, 404, 500
+            var response = ((WebException) exception).Response;
+            if (response == null)
             {
-                // 401, 404, 500
-                var response = ((WebException) exception).Response;
-                return new Exception(
-                    string.Format("Web exception, body follows:\n{0}", ParseResponseAsString(response)), exception);
+                return new HttpWebResponseWasNull(url);
             }
 
-            return new Exception("Internal error", exception);
-        }
-
-        static TDown ParseResponseAsJson<TDown>(WebResponse response)
-        {
-            if (response.ContentType != "application/json")
-                throw new Exception("Invalid content type, this is not json");
-            using (var responseStream = response.GetResponseStream())
+            var status = ((HttpWebResponse)response).StatusCode;
+            var body = ParseResponseAsString(response);
+            List<Error> errors;
+            try
             {
-                if (responseStream == null) throw new Exception("Invalid response");
-
-                using (var reader = new JsonTextReader(new StreamReader(responseStream)))
+                errors = new List<Error>{body.FromJson<Error>()};
+            }
+            catch 
+            {
+                try
                 {
-                    var deserializer = new JsonSerializer();
-                    return deserializer.Deserialize<TDown>(reader);
+                    errors = body.FromJson<List<Error>>();
+                }
+                catch 
+                {
+                    errors = new List<Error> { new Error { Key = "Message", Value = body } };
                 }
             }
+            if (status == HttpStatusCode.BadRequest) return new Http400(errors);
+            if (status == HttpStatusCode.Unauthorized) return new Http401(errors);
+            if (status == HttpStatusCode.Forbidden) return new Http403(errors);
+            return new Http500(errors);
         }
 
         static string ParseResponseAsString(WebResponse response)

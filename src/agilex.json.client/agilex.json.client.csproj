@@ -43,6 +43,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Client\JsonExtensions.cs" />
+    <Compile Include="Errors\Error.cs" />
+    <Compile Include="Errors\Http400.cs" />
+    <Compile Include="Errors\Http401.cs" />
+    <Compile Include="Errors\Http403.cs" />
+    <Compile Include="Errors\Http500.cs" />
+    <Compile Include="Errors\HttpError.cs" />
+    <Compile Include="Errors\HttpWebResponseWasNull.cs" />
     <Compile Include="Rest\IRestfulClient.cs" />
     <Compile Include="Urls\IUrlBuilder.cs" />
     <Compile Include="Client\IWebClient.cs" />
