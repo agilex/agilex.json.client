@@ -27,17 +27,12 @@ namespace agilex.json.client.Client
 
         protected BaseWebClient(string baseUrl, ITypeParser typeParser, string contentType)
             : this(new UrlBuilder(baseUrl), typeParser, new NoOpHeaderAppender(), contentType)
-        {            
+        {
         }
 
         public T Get<T>(string urlFragment)
         {
-            return InvokeWebClient(
-                urlFragment, (webClient, fullUrl) =>
-                {
-                    var result = webClient.MakeWebRequestWithResult(fullUrl, HttpVerbGet);
-                    return _typeParser.From<T>(result);
-                });
+            return Download<T>(urlFragment, HttpVerbGet);
         }
 
         public void Post<T>(string urlFragment, T body)
@@ -57,74 +52,58 @@ namespace agilex.json.client.Client
 
         public TDown PostWithResponse<TDown>(string urlFragment)
         {
-            return InvokeWebClient(urlFragment,
-                                   (webClient, fullUrl) => {
-                                       var result = webClient.MakeWebRequestWithResult(fullUrl, HttpVerbPost);
-                                       return _typeParser.From<TDown>(result);
-                                   });
+            return Download<TDown>(urlFragment, HttpVerbPost);
+        }
+
+        TDown Download<TDown>(string urlFragment, string method)
+        {
+            return InvokeWebClient(
+                urlFragment, (webClient, fullUrl) =>
+                {
+                    var result = webClient.MakeWebRequestWithResult(fullUrl, method);
+                    return _typeParser.From<TDown>(result);
+                });
+        }
+
+        TDown UploadWithResponse<TUp, TDown>(string urlFragment, TUp body, string method)
+        {
+            return InvokeWebClient(
+                urlFragment, (webClient, fullUrl) =>
+                {
+                    var result = webClient.MakeWebRequestWithResult(fullUrl, method, _typeParser.To(body));
+                    return _typeParser.From<TDown>(result);
+                });
         }
 
         public T PostWithResponse<T>(string urlFragment, T body)
         {
-            return InvokeWebClient(
-                urlFragment, (webClient, fullUrl) =>
-                {
-                    var result = webClient.MakeWebRequestWithResult(fullUrl, HttpVerbPost, _typeParser.To(body));
-                    return _typeParser.From<T>(result);
-                });
+            return UploadWithResponse<T, T>(urlFragment, body, HttpVerbPost);
         }
 
         public TDown PostWithResponse<TUp, TDown>(string urlFragment, TUp body)
         {
-            return InvokeWebClient(
-                urlFragment, (webClient, fullUrl) =>
-                {
-                    var result = webClient.MakeWebRequestWithResult(fullUrl, HttpVerbPost, _typeParser.To(body));
-                    return _typeParser.From<TDown>(result);
-                });
+            return UploadWithResponse<TUp, TDown>(urlFragment, body, HttpVerbPost);
         }
 
         public TDown PutWithResponse<TDown>(string urlFragment)
         {
-            return InvokeWebClient(urlFragment,
-                       (webClient, fullUrl) =>
-                       {
-                           var result = webClient.MakeWebRequestWithResult(fullUrl, HttpVerbPut);
-                           return _typeParser.From<TDown>(result);
-                       });
-
+            return Download<TDown>(urlFragment, HttpVerbPut);
         }
 
         public T PutWithResponse<T>(string urlFragment, T body)
         {
-            return InvokeWebClient(
-                urlFragment, (webClient, fullUrl) =>
-                {
-                    var result = webClient.MakeWebRequestWithResult(fullUrl, HttpVerbPut, _typeParser.To(body));
-                    return _typeParser.From<T>(result);
-                });
+            return UploadWithResponse<T, T>(urlFragment, body, HttpVerbPut);
         }
 
         public TDown PutWithResponse<TUp, TDown>(string urlFragment, TUp body)
         {
-            return InvokeWebClient(
-                urlFragment, (webClient, fullUrl) =>
-                {
-                    var result = webClient.MakeWebRequestWithResult(fullUrl, HttpVerbPut, _typeParser.To(body));
-                    return _typeParser.From<TDown>(result);
-                });
+            return UploadWithResponse<TUp, TDown>(urlFragment, body, HttpVerbPut);
         }
 
-        public T DeleteWithResponse<T>(string urlFragment)
+        public TDown DeleteWithResponse<TDown>(string urlFragment)
         {
-            return InvokeWebClient(
-                urlFragment, (webClient, fullUrl) =>
-                {
-                    var result = webClient.MakeWebRequestWithResult(fullUrl, HttpVerbDelete);
-                    return _typeParser.From<T>(result);
-                });
+            return Download<TDown>(urlFragment, HttpVerbDelete);
         }
-
 
         T InvokeWebClient<T>(string urlFragment, Func<IRawClient, string, T> action)
         {
