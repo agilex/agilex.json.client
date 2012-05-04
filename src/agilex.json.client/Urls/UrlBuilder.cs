@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-
-namespace agilex.json.client.Urls
+﻿namespace agilex.json.client.Urls
 {
     public class UrlBuilder : IUrlBuilder
     {
@@ -15,9 +13,7 @@ namespace agilex.json.client.Urls
 
         public string Build(string urlfragment)
         {
-            var url = string.Format("{0}/{1}", _baseUrl, urlfragment);
-            Trace.WriteLine(url);
-            return url;
+            return string.Format("{0}/{1}", _baseUrl, urlfragment);
         }
 
         public string BuildPagedUrl(string urlFragment, int page, int size)

@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
 using Newtonsoft.Json;
+using agilex.json.client.Rest;
 
 namespace agilex.json.client.Client
 {
@@ -29,6 +31,8 @@ namespace agilex.json.client.Client
             TryWebRequest(
                 url, method, request =>
                                  {
+                                     if (method == RestfulClient.HttpVerbPut || method == RestfulClient.HttpVerbPost)
+                                         AddEmptyBody(request);
                                      var response = InitiateRequest(request);
                                      ParseResponseAsString(response);
                                  });
@@ -49,7 +53,8 @@ namespace agilex.json.client.Client
         {
             return TryWebRequest<T>(url, method, request =>
                                                      {
-                                                         AddEmptyBody(request);
+                                                         if (method == RestfulClient.HttpVerbPut || method == RestfulClient.HttpVerbPost)
+                                                             AddEmptyBody(request);
                                                          return InitiateRequest(request);
                                                      });
         }
@@ -83,6 +88,7 @@ namespace agilex.json.client.Client
         {
             try
             {
+                Trace.WriteLine(string.Format("{0}, {1}",method, url));
                 var request = BuildRequest(url, method, _username, _password);
                 webRequest(request);
             }

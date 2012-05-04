@@ -10,10 +10,10 @@ namespace agilex.json.client.Rest
         readonly IUrlBuilder _urlBuilder;
         readonly string _username;
         readonly string _password;
-        const string HttpVerbGet = "GET";
-        const string HttpVerbPost = "POST";
-        const string HttpVerbPut = "PUT";
-        const string HttpVerbDelete = "DELETE";
+        public const string HttpVerbGet = "GET";
+        public const string HttpVerbPost = "POST";
+        public const string HttpVerbPut = "PUT";
+        public const string HttpVerbDelete = "DELETE";
 
         public RestfulClient(IWebClientFactory webClientFactory, IUrlBuilder urlBuilder, string username, string password)
         {
